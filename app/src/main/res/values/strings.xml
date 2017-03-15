@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GitHubUsers2</string>
+    <string name="network_offline">Check your internet connection!</string>
+    <string name="try_again">Try again!</string>
+    <string name="login">Login: </string>
+    <string name="type">Type: </string>
+</resources>

@@ -37,6 +37,7 @@ public class UsersListActivity extends AppCompatActivity {
     private List<User> listUsers = new ArrayList<User>();
     private LinearLayoutManager llm;
     private RecyclerViewUsersAdapter rvAdapter;
+    private RetrofitListUsersInterface service;
     private int lastUserID = 0;
 
     @Override
@@ -47,6 +48,7 @@ public class UsersListActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initViews();
+        initRetrofit();
         checkInternet();
         setOnItemClickListener();
         setOnScrollListener();
@@ -113,18 +115,18 @@ public class UsersListActivity extends AppCompatActivity {
         });
     }
 
-    private void getUsers() {
-        swipeRefreshLayout.setRefreshing(true);
-
+    private void initRetrofit(){
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.URL_ROOT)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+        service = retrofit.create(RetrofitListUsersInterface.class);
+    }
 
-        RetrofitListUsersInterface service = retrofit.create(RetrofitListUsersInterface.class);
+    private void getUsers() {
+        swipeRefreshLayout.setRefreshing(true);
 
         Call<List<User>> call = service.getUsers(lastUserID, Constants.ITEMS_PER_PAGE);
-
         call.enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {

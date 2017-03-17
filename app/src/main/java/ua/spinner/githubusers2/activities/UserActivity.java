@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
+import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -15,8 +16,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import ua.spinner.githubusers2.Constants;
+import ua.spinner.githubusers2.CustomApplication;
 import ua.spinner.githubusers2.R;
 import ua.spinner.githubusers2.interfaces.RetrofitUserInterface;
 import ua.spinner.githubusers2.pojo.UserMoreInfo;
@@ -38,13 +39,17 @@ public class UserActivity extends AppCompatActivity {
     @BindView(R.id.tvFollowers) TextView tvFollowers;
     @BindView(R.id.tvFollowing) TextView tvFollowing;
 
+    @Inject Retrofit retrofit;
+
     private String login = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
+
         ButterKnife.bind(this);
+        ((CustomApplication)getApplication()).getNetworkComponent().inject(this);
 
         login = getIntent().getStringExtra(Constants.LOGIN);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -67,11 +72,6 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void getUser(String login) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.URL_ROOT)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
         RetrofitUserInterface service = retrofit.create(RetrofitUserInterface.class);
 
         Call<UserMoreInfo> call = service.getUser(login);

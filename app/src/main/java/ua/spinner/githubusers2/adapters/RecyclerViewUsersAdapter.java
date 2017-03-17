@@ -1,6 +1,8 @@
 package ua.spinner.githubusers2.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import ua.spinner.githubusers2.Constants;
 import ua.spinner.githubusers2.R;
+import ua.spinner.githubusers2.activities.UserActivity;
 import ua.spinner.githubusers2.pojo.User;
 
 /**
@@ -23,7 +27,6 @@ public class RecyclerViewUsersAdapter extends RecyclerView.Adapter<RecyclerViewU
     private List<User> listUsers;
     private Context context;
 
-
     public RecyclerViewUsersAdapter(Context context, List<User> listUsers){
         this.context = context;
         this.listUsers = listUsers;
@@ -34,7 +37,17 @@ public class RecyclerViewUsersAdapter extends RecyclerView.Adapter<RecyclerViewU
         LayoutInflater mInflater = LayoutInflater.from(viewGroup.getContext());
 
         ViewGroup mainGroup = (ViewGroup) mInflater.inflate(R.layout.item_user, viewGroup, false);
-        RecyclerViewHolder viewHolder = new RecyclerViewHolder(mainGroup);
+        RecyclerViewHolder viewHolder = new RecyclerViewHolder(mainGroup, new OnRecyclerViewItemClickListener() {
+            @Override
+            public void OnItemClicked(int position) {
+                String userLogin = listUsers.get(position).getLogin();
+                Bundle bundle = new Bundle();
+                bundle.putString(Constants.LOGIN, userLogin);
+                Intent intent = new Intent(context, UserActivity.class);
+                intent.putExtras(bundle);
+                context.startActivity(intent);
+            }
+        });
         return viewHolder;
     }
 
@@ -55,16 +68,31 @@ public class RecyclerViewUsersAdapter extends RecyclerView.Adapter<RecyclerViewU
         return (null != listUsers ? listUsers.size() : 0);
     }
 
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder  {
+    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         @BindView(R.id.ivAvatar) CircleImageView ivAvatar;
         @BindView(R.id.textViewLogin) TextView tvLogin;
         @BindView(R.id.textViewType) TextView tvType;
 
-        public RecyclerViewHolder(View itemView) {
+        private OnRecyclerViewItemClickListener clickListener;
+
+        public RecyclerViewHolder(View itemView, OnRecyclerViewItemClickListener clickListener) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            this.clickListener = clickListener;
+
+            itemView.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View view) {
+            clickListener.OnItemClicked(getAdapterPosition());
+        }
+    }
+
+    public interface OnRecyclerViewItemClickListener{
+
+        void OnItemClicked(int position);
     }
 
 }

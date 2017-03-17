@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -19,8 +20,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import ua.spinner.githubusers2.Constants;
+import ua.spinner.githubusers2.CustomApplication;
 import ua.spinner.githubusers2.R;
 import ua.spinner.githubusers2.RecyclerItemClickListener;
 import ua.spinner.githubusers2.interfaces.RetrofitListUsersInterface;
@@ -34,11 +35,14 @@ public class UsersListActivity extends AppCompatActivity {
     @BindView(R.id.recyclerViewUsers) RecyclerView rvUsers;
     @BindView(R.id.buttonConnect) Button btnConnect;
 
+    @Inject Retrofit retrofit;
+    private RetrofitListUsersInterface service;
+    private RecyclerViewUsersAdapter rvAdapter;
+
     private List<User> listUsers = new ArrayList<User>();
     private LinearLayoutManager llm;
-    private RecyclerViewUsersAdapter rvAdapter;
-    private RetrofitListUsersInterface service;
     private int lastUserID = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +50,10 @@ public class UsersListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_users_list);
 
         ButterKnife.bind(this);
+        ((CustomApplication)getApplication()).getNetworkComponent().inject(this);
 
         initViews();
-        initRetrofit();
+        initRetrofitService();
         checkInternet();
         setOnItemClickListener();
         setOnScrollListener();
@@ -115,11 +120,7 @@ public class UsersListActivity extends AppCompatActivity {
         });
     }
 
-    private void initRetrofit(){
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.URL_ROOT)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    private void initRetrofitService(){
         service = retrofit.create(RetrofitListUsersInterface.class);
     }
 

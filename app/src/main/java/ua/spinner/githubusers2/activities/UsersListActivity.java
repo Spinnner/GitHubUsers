@@ -1,6 +1,5 @@
 package ua.spinner.githubusers2.activities;
 
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -33,11 +33,12 @@ import ua.spinner.githubusers2.pojo.User;
 
 public class UsersListActivity extends AppCompatActivity {
 
-    @BindView(R.id.swipeLayout) SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.recyclerViewUsers) RecyclerView rvUsers;
     @BindView(R.id.buttonConnect) Button btnConnect;
+    @BindView(R.id.prBarLoading) ProgressBar progressBar;
 
     @Inject Retrofit retrofit;
+
     private Converter<ResponseBody, NetworkAPIError> errorConverter;
     private RetrofitListUsersInterface service;
     private RecyclerViewUsersAdapter rvAdapter;
@@ -65,9 +66,6 @@ public class UsersListActivity extends AppCompatActivity {
         rvUsers.setLayoutManager(llm);
         rvAdapter = new RecyclerViewUsersAdapter(this, listUsers);
         rvUsers.setAdapter(rvAdapter);
-
-        swipeRefreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
-        swipeRefreshLayout.setEnabled(false);
     }
 
     private void checkInternet(){
@@ -86,7 +84,6 @@ public class UsersListActivity extends AppCompatActivity {
         checkInternet();
     }
 
-
     private void setOnScrollListener(){
         rvUsers.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -99,7 +96,7 @@ public class UsersListActivity extends AppCompatActivity {
                 super.onScrolled(recyclerView, dx, dy);
 
                 int lastVisibleItem = llm.findLastVisibleItemPosition();
-                if(lastVisibleItem == listUsers.size() - 1 && dy > 0 && !swipeRefreshLayout.isRefreshing()){
+                if(lastVisibleItem == listUsers.size() - 1 && dy > 0 && progressBar.getVisibility() != View.VISIBLE){
                     getUsers();
                 }
             }
@@ -112,21 +109,20 @@ public class UsersListActivity extends AppCompatActivity {
     }
 
     private void getUsers() {
-        swipeRefreshLayout.setRefreshing(true);
+        progressBar.setVisibility(View.VISIBLE);
 
         Call<List<User>> call = service.getUsers(lastUserID, Constants.ITEMS_PER_PAGE);
         call.enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if(response.isSuccessful()){
-
                     for (User user: response.body()) {
                         lastUserID = user.getId();
                         listUsers.add(user);
                     }
 
                     rvAdapter.notifyItemRangeInserted(listUsers.size(), response.body().size());
-                    swipeRefreshLayout.setRefreshing(false);
+                    progressBar.setVisibility(View.GONE);
                 }
                 else{
                     NetworkAPIError error = Utils.parseError(errorConverter, response);
@@ -139,7 +135,6 @@ public class UsersListActivity extends AppCompatActivity {
                 call.cancel();
                 Log.e(Constants.TAG_ON_FAILURE, t.getMessage());
             }
-
         });
     }
 }

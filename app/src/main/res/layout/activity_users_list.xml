@@ -6,22 +6,22 @@
     android:background="@android:color/white"
     tools:context="ua.spinner.githubusers2.activities.UsersListActivity">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipeLayout"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerViewUsers"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white">
+        android:background="@android:color/white"
+        android:fadeScrollbars="false"
+        android:scrollbarSize="4dp"
+        android:scrollbarThumbVertical="@drawable/scrollbar"
+        android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerViewUsers"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fadeScrollbars="false"
-            android:scrollbarSize="4dp"
-            android:scrollbarThumbVertical="@drawable/scrollbar"
-            android:scrollbars="vertical"></android.support.v7.widget.RecyclerView>
-
-    </android.support.v4.widget.SwipeRefreshLayout>
+    <ProgressBar
+        android:id="@+id/prBarLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp" />
 
     <Button
         android:id="@+id/buttonConnect"
@@ -30,11 +30,11 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
-        android:visibility="gone"
         android:background="@android:color/holo_orange_dark"
         android:gravity="center"
         android:text="@string/try_again"
         android:textColor="@android:color/white"
-        android:textSize="17sp" />
+        android:textSize="17sp"
+        android:visibility="gone" />
 
 </RelativeLayout>

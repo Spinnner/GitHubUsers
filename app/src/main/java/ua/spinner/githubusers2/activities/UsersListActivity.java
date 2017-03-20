@@ -46,7 +46,6 @@ public class UsersListActivity extends AppCompatActivity {
     private LinearLayoutManager llm;
     private int lastUserID = 0;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +71,7 @@ public class UsersListActivity extends AppCompatActivity {
     }
 
     private void checkInternet(){
-        if(!Utils.isNetworkOnline(this)){
+        if(!Utils.isNetworkAvailable(this)){
             btnConnect.setVisibility(View.VISIBLE);
             Toast.makeText(this, R.string.network_offline, Toast.LENGTH_LONG).show();
         }
@@ -120,31 +119,25 @@ public class UsersListActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if(response.isSuccessful()){
-                    List<User> list = response.body();
 
-                    for (int i = 0; i < list.size(); i++) {
-                        User user = list.get(i);
-                        int id = user.getId();
-                        String login = user.getLogin();
-                        String avatar = user.getAvatar();
-                        String type = user.getType();
-
-                        lastUserID = id;
-                        listUsers.add(new User(id, avatar, login, type));
+                    for (User user: response.body()) {
+                        lastUserID = user.getId();
+                        listUsers.add(user);
                     }
-                    rvAdapter.notifyDataSetChanged();
+
+                    rvAdapter.notifyItemRangeInserted(listUsers.size(), response.body().size());
                     swipeRefreshLayout.setRefreshing(false);
                 }
                 else{
                     NetworkAPIError error = Utils.parseError(errorConverter, response);
-                    Log.e("Error message", error.message());
+                    Log.e(Constants.TAG_ERROR, error.message());
                 }
             }
 
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
                 call.cancel();
-                Log.e("onFailure", t.getMessage());
+                Log.e(Constants.TAG_ON_FAILURE, t.getMessage());
             }
 
         });

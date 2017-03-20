@@ -9,4 +9,7 @@ public class Constants {
     public static final String URL_ROOT = "https://api.github.com";
     public static final String LOGIN = "login";
     public static final int ITEMS_PER_PAGE = 10;
+    public static final String TAG_ERROR = "Error message";
+    public static final String TAG_ON_FAILURE = "onFailure";
+
 }

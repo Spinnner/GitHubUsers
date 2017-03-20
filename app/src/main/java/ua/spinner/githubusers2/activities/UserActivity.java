@@ -8,10 +8,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
-
 import java.lang.annotation.Annotation;
-
 import javax.inject.Inject;
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -45,6 +44,15 @@ public class UserActivity extends AppCompatActivity {
     @BindView(R.id.tvEmail) TextView tvEmail;
     @BindView(R.id.tvFollowers) TextView tvFollowers;
     @BindView(R.id.tvFollowing) TextView tvFollowing;
+
+    @BindString(R.string.name) String titleName;
+    @BindString(R.string.login) String titleLogin;
+    @BindString(R.string.type) String titleType;
+    @BindString(R.string.blog) String titleBlog;
+    @BindString(R.string.location) String titleLocation;
+    @BindString(R.string.email) String titleEmail;
+    @BindString(R.string.followers) String titleFollowers;
+    @BindString(R.string.following) String titleFollowing;
 
     @Inject Retrofit retrofit;
 
@@ -88,41 +96,41 @@ public class UserActivity extends AppCompatActivity {
         call.enqueue(new Callback<UserMoreInfo>() {
             @Override
             public void onResponse(Call<UserMoreInfo> call, Response<UserMoreInfo> response) {
-                    progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
 
                 if(response.isSuccessful()) {
                     UserMoreInfo user = response.body();
 
-                    String login = user.getLogin();
-                    String name = user.getName();
-                    String type = user.getType();
-                    String blog = user.getBlog();
-                    String avatar = user.getAvatarUrl();
-                    String location = user.getLocation();
-                    String email = user.getEmail();
-                    String followers = user.getFollowers().toString();
-                    String following = user.getFollowing().toString();
+                    String login = Utils.replaceNull(user.getLogin());
+                    String name = Utils.replaceNull(user.getName());
+                    String type = Utils.replaceNull(user.getType());
+                    String blog = Utils.replaceNull(user.getBlog());
+                    String avatar = Utils.replaceNull(user.getAvatarUrl());
+                    String location = Utils.replaceNull(user.getLocation());
+                    String email = Utils.replaceNull(user.getEmail());
+                    String followers = Utils.replaceNull(user.getFollowers().toString());
+                    String following = Utils.replaceNull(user.getFollowing().toString());
 
                     Picasso.with(getApplicationContext()).load(avatar).placeholder(R.drawable.profile_photo).into(ivAvatar);
-                    tvLogin.setText("Login: " + login);
-                    tvName.setText("Name: " + name);
-                    tvType.setText("Type: " + type);
-                    tvBlog.setText("Blog: " + blog);
-                    tvLocation.setText("Location: " + location);
-                    tvEmail.setText("Email: " + email);
-                    tvFollowers.setText("Followers: " + followers);
-                    tvFollowing.setText("Following: " + following);
+                    tvLogin.setText(titleLogin.concat(" ").concat(login));
+                    tvName.setText(titleName.concat(" ").concat(name));
+                    tvType.setText(titleType.concat(" ").concat(type));
+                    tvBlog.setText(titleBlog.concat(" ").concat(blog));
+                    tvLocation.setText(titleLocation.concat(" ").concat(location));
+                    tvEmail.setText(titleEmail.concat(" ").concat(email));
+                    tvFollowers.setText(titleFollowers.concat(" ").concat(followers));
+                    tvFollowing.setText(titleFollowing.concat(" ").concat(following));
                 }
                 else{
                     NetworkAPIError error = Utils.parseError(errorConverter, response);
-                    Log.e("Error message", error.message());
+                    Log.e(Constants.TAG_ERROR, error.message());
                 }
             }
 
             @Override
             public void onFailure(Call call, Throwable t) {
                 call.cancel();
-                Log.e("onFailure", t.getMessage());
+                Log.e(Constants.TAG_ON_FAILURE, t.getMessage());
             }
 
         });

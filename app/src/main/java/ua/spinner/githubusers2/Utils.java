@@ -3,6 +3,7 @@ package ua.spinner.githubusers2;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import java.io.IOException;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
@@ -14,13 +15,12 @@ import retrofit2.Response;
 
 public class Utils {
 
-    public static boolean isNetworkOnline(Context con)
+    public static boolean isNetworkAvailable(Context context)
     {
         boolean status = false;
         try
         {
-            ConnectivityManager cm = (ConnectivityManager) con
-                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo netInfo = cm.getNetworkInfo(0);
 
             if (netInfo != null && netInfo.getState() == NetworkInfo.State.CONNECTED) {
@@ -36,7 +36,7 @@ public class Utils {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(Constants.TAG_ERROR, e.getMessage());
             return false;
         }
 
@@ -52,6 +52,10 @@ public class Utils {
         }
 
         return error;
+    }
+
+    public static String replaceNull(String str) {
+        return str == null ? "" : str;
     }
 
 }

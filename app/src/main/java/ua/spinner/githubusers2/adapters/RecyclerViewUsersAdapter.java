@@ -54,13 +54,17 @@ public class RecyclerViewUsersAdapter extends RecyclerView.Adapter<RecyclerViewU
     @Override
     public void onBindViewHolder(RecyclerViewHolder holder, int position) {
         User user = listUsers.get(position);
-        String avatar = user.getAvatar();
+        String avatar = user.getAvatarUrl();
         String login = user.getLogin();
         String type = user.getType();
 
         Picasso.with(context).load(avatar).placeholder(R.drawable.profile_photo).into(holder.ivAvatar);
-        holder.tvLogin.setText(context.getText(R.string.login) + " " + login);
-        holder.tvType.setText(context.getText(R.string.type) + " " + type);
+
+        String titleLogin = context.getString(R.string.login);
+        String titleType = context.getString(R.string.type);
+
+        holder.tvLogin.setText(titleLogin.concat(" ").concat(login));
+        holder.tvType.setText(titleType.concat(" ").concat(type));
     }
 
     @Override

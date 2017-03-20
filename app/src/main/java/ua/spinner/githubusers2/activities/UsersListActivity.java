@@ -9,18 +9,22 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Converter;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import ua.spinner.githubusers2.Constants;
 import ua.spinner.githubusers2.CustomApplication;
+import ua.spinner.githubusers2.NetworkAPIError;
 import ua.spinner.githubusers2.R;
 import ua.spinner.githubusers2.interfaces.RetrofitListUsersInterface;
 import ua.spinner.githubusers2.Utils;
@@ -34,6 +38,7 @@ public class UsersListActivity extends AppCompatActivity {
     @BindView(R.id.buttonConnect) Button btnConnect;
 
     @Inject Retrofit retrofit;
+    private Converter<ResponseBody, NetworkAPIError> errorConverter;
     private RetrofitListUsersInterface service;
     private RecyclerViewUsersAdapter rvAdapter;
 
@@ -51,7 +56,7 @@ public class UsersListActivity extends AppCompatActivity {
         ((CustomApplication)getApplication()).getNetworkComponent().inject(this);
 
         initViews();
-        initRetrofitService();
+        initRetrofit();
         checkInternet();
         setOnScrollListener();
     }
@@ -102,8 +107,9 @@ public class UsersListActivity extends AppCompatActivity {
         });
     }
 
-    private void initRetrofitService(){
+    private void initRetrofit(){
         service = retrofit.create(RetrofitListUsersInterface.class);
+        errorConverter = retrofit.responseBodyConverter(NetworkAPIError.class, new Annotation[0]);
     }
 
     private void getUsers() {
@@ -113,9 +119,7 @@ public class UsersListActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
-                try {
-                    //Log.e("MESSAGES: ", response.toString());
-
+                if(response.isSuccessful()){
                     List<User> list = response.body();
 
                     for (int i = 0; i < list.size(); i++) {
@@ -130,16 +134,17 @@ public class UsersListActivity extends AppCompatActivity {
                     }
                     rvAdapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
-                } catch (Exception e) {
-                    Log.d("onResponse", "There is an error");
-                    e.printStackTrace();
+                }
+                else{
+                    NetworkAPIError error = Utils.parseError(errorConverter, response);
+                    Log.e("Error message", error.message());
                 }
             }
 
             @Override
             public void onFailure(Call<List<User>> call, Throwable t) {
                 call.cancel();
-                Log.e("onFailure", t.toString());
+                Log.e("onFailure", t.getMessage());
             }
 
         });

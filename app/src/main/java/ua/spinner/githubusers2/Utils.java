@@ -3,6 +3,10 @@ package ua.spinner.githubusers2;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import java.io.IOException;
+import okhttp3.ResponseBody;
+import retrofit2.Converter;
+import retrofit2.Response;
 
 /**
  * Created by Spinner on 3/11/2017.
@@ -37,6 +41,17 @@ public class Utils {
         }
 
         return status;
+    }
+
+    public static NetworkAPIError parseError(Converter<ResponseBody, NetworkAPIError> errorConverter, Response<?> response) {
+        NetworkAPIError error;
+        try {
+            error = errorConverter.convert(response.errorBody());
+        } catch (IOException e) {
+            return new NetworkAPIError();
+        }
+
+        return error;
     }
 
 }

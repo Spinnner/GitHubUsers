@@ -8,17 +8,24 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
+
+import java.lang.annotation.Annotation;
+
 import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Converter;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import ua.spinner.githubusers2.Constants;
 import ua.spinner.githubusers2.CustomApplication;
+import ua.spinner.githubusers2.NetworkAPIError;
 import ua.spinner.githubusers2.R;
+import ua.spinner.githubusers2.Utils;
 import ua.spinner.githubusers2.interfaces.RetrofitUserInterface;
 import ua.spinner.githubusers2.pojo.UserMoreInfo;
 
@@ -73,16 +80,17 @@ public class UserActivity extends AppCompatActivity {
 
     private void getUser(String login) {
         RetrofitUserInterface service = retrofit.create(RetrofitUserInterface.class);
+        final Converter<ResponseBody, NetworkAPIError> errorConverter
+                = retrofit.responseBodyConverter(NetworkAPIError.class, new Annotation[0]);
 
         Call<UserMoreInfo> call = service.getUser(login);
 
         call.enqueue(new Callback<UserMoreInfo>() {
             @Override
             public void onResponse(Call<UserMoreInfo> call, Response<UserMoreInfo> response) {
-                try {
-                    //Log.e("MESSAGES2: ", response.toString());
                     progressBar.setVisibility(View.GONE);
 
+                if(response.isSuccessful()) {
                     UserMoreInfo user = response.body();
 
                     String login = user.getLogin();
@@ -104,17 +112,17 @@ public class UserActivity extends AppCompatActivity {
                     tvEmail.setText("Email: " + email);
                     tvFollowers.setText("Followers: " + followers);
                     tvFollowing.setText("Following: " + following);
-
-                } catch (Exception e) {
-                    Log.e("onResponse", "There is an error");
-                    e.printStackTrace();
+                }
+                else{
+                    NetworkAPIError error = Utils.parseError(errorConverter, response);
+                    Log.e("Error message", error.message());
                 }
             }
 
             @Override
             public void onFailure(Call call, Throwable t) {
                 call.cancel();
-                Log.e("onFailure", t.toString());
+                Log.e("onFailure", t.getMessage());
             }
 
         });
